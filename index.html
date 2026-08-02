@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌊 Морская вечеринка — Стикер дня </title>
+<style>
+  :root {
+    --game-bg: #0a2540;
+    --game-bg-2: #13406e;
+    --game-card: #f4f9ff;
+    --game-primary: #1e73b8;
+    --game-accent: #f4b942;
+    --game-text: #0a2540;
+    --game-success: #2ecc71;
+    --game-error: #e74c3c;
+    --game-muted: #a8c5e0;
+    --game-sand: #f7e7c4;
+    --game-coral: #ff7f6a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+    color: var(--game-text);
+    background: linear-gradient(180deg, #0a2540 0%, #13406e 45%, #1e73b8 100%);
+    overflow-x: hidden;
+  }
+
+  /* === Морской фон с волнами === */
+  .sea-bg {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .wave {
+    position: absolute;
+    left: -10%;
+    width: 120%;
+    height: 140px;
+    background-repeat: repeat-x;
+    background-size: 500px 140px;
+    opacity: 0.55;
+    animation: waveMove 14s linear infinite;
+  }
+  .wave.w1 { bottom: 0; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 140'><path fill='%231e73b8' d='M0 70 Q 62 30 125 70 T 250 70 T 375 70 T 500 70 V140 H0 Z'/></svg>"); }
+  .wave.w2 { bottom: 40px; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 140'><path fill='%23f4b942' opacity='0.35' d='M0 70 Q 62 110 125 70 T 250 70 T 375 70 T 500 70 V140 H0 Z'/></svg>"); animation-duration: 20s; animation-direction: reverse; }
+  .wave.w3 { bottom: 90px; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 140'><path fill='%23ffffff' opacity='0.18' d='M0 70 Q 62 30 125 70 T 250 70 T 375 70 T 500 70 V140 H0 Z'/></svg>"); animation-duration: 26s; }
+
+  @keyframes waveMove {
+    from { background-position-x: 0; }
+    to   { background-position-x: 500px; }
+  }
+
+  /* Декор: ракушки, якоря, морские звёзды */
+  .decor {
+    position: absolute;
+    font-size: 2.2rem;
+    opacity: 0.55;
+    animation: float 6s ease-in-out infinite;
+    user-select: none;
+  }
+  .decor.d1 { top: 8%; left: 6%; animation-delay: 0s; }
+  .decor.d2 { top: 18%; right: 7%; animation-delay: 1s; font-size: 2.6rem; }
+  .decor.d3 { top: 45%; left: 4%; animation-delay: 2s; }
+  .decor.d4 { top: 60%; right: 5%; animation-delay: 0.5s; font-size: 2.8rem; }
+  .decor.d5 { top: 30%; left: 50%; animation-delay: 1.5s; font-size: 1.8rem; }
+
+  @keyframes float {
+    0%,100% { transform: translateY(0) rotate(-5deg); }
+    50%     { transform: translateY(-18px) rotate(5deg); }
+  }
+
+  /* Пузыри */
+  .bubble {
+    position: absolute;
+    bottom: -40px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), rgba(255,255,255,0.1));
+    border: 1px solid rgba(255,255,255,0.4);
+    animation: rise linear infinite;
+    opacity: 0.6;
+  }
+  @keyframes rise {
+    to { transform: translateY(-110vh); opacity: 0; }
+  }
+
+  /* Гирлянда вечеринки */
+  .garland {
+    position: absolute;
+    top: 0; left: 0; width: 100%;
+    height: 60px;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* === Контейнер игры === */
+  .app {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .screen {
+    width: 100%;
+    max-width: 720px;
+    display: none;
+    animation: pop 0.5s ease;
+  }
+  .screen.active { display: block; }
+
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* === Стартовый экран === */
+  .start-card {
+    background: var(--game-card);
+    border-radius: 28px;
+    padding: 40px 28px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4), inset 0 0 0 4px var(--game-accent);
+    position: relative;
+    overflow: hidden;
+  }
+  .start-card::before {
+    content: "";
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    background: radial-gradient(circle, var(--game-accent) 0%, transparent 70%);
+    opacity: 0.35;
+  }
+  .start-card h1 {
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    color: var(--game-primary);
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 0 var(--game-sand);
+  }
+  .start-card .subtitle {
+    color: var(--game-primary);
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    opacity: 0.85;
+  }
+  .start-card .big-emoji {
+    font-size: 5rem;
+    display: block;
+    margin: 10px auto 18px;
+    animation: float 4s ease-in-out infinite;
+  }
+  .start-card p {
+    color: var(--game-text);
+    font-size: 1.05rem;
+    line-height: 1.5;
+    margin-bottom: 24px;
+  }
+
+  /* === Кнопки === */
+  .btn {
+    display: inline-block;
+    padding: 18px 36px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    font-family: inherit;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--game-accent), var(--game-coral));
+    color: #fff;
+    box-shadow: 0 6px 0 #c97a30, 0 10px 20px rgba(0,0,0,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #c97a30, 0 14px 25px rgba(0,0,0,0.35); }
+  .btn-primary:active { transform: translateY(3px); box-shadow: 0 3px 0 #c97a30; }
+
+  .btn-secondary {
+    background: var(--game-card);
+    color: var(--game-primary);
+    border: 3px solid var(--game-primary);
+    box-shadow: 0 5px 0 var(--game-primary);
+  }
+  .btn-secondary:hover { transform: translateY(-2px); }
+  .btn-secondary:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--game-primary); }
+
+  /* === Игровой экран === */
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.95);
+    border-radius: 18px;
+    padding: 12px 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .score-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    color: var(--game-primary);
+    font-size: 1.1rem;
+  }
+  .score-box .coin {
+    width: 34px; height: 34px;
+    background: radial-gradient(circle at 30% 30%, var(--game-accent), #c97a30);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: bold;
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2);
+  }
+  .progress-box {
+    font-size: 0.95rem;
+    color: var(--game-text);
+    text-align: right;
+  }
+  .progress-box b { color: var(--game-primary); }
+
+  .progress-line {
+    height: 8px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--game-accent), var(--game-coral));
+    border-radius: 10px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+
+  .question-card {
+    background: var(--game-card);
+    border-radius: 24px;
+    padding: 26px 22px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3), inset 0 0 0 3px var(--game-sand);
+    position: relative;
+  }
+  .question-card::after {
+    content: "⚓";
+    position: absolute;
+    top: -18px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--game-card);
+    padding: 4px 14px;
+    border-radius: 50px;
+    font-size: 1.4rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+
+  .question-num {
+    text-align: center;
+    color: var(--game-primary);
+    font-weight: bold;
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .media-box {
+    background: linear-gradient(135deg, var(--game-sand), #fff);
+    border: 3px dashed var(--game-primary);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 18px;
+    text-align: center;
+    min-height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .media-box img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+    object-fit: contain;
+  }
+  .media-box audio, .media-box video {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 8px;
+  }
+  .media-label {
+    font-size: 0.85rem;
+    color: var(--game-primary);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .question-text {
+    font-size: clamp(1.15rem, 3.5vw, 1.45rem);
+    color: var(--game-text);
+    text-align: center;
+    margin-bottom: 22px;
+    line-height: 1.4;
+    font-weight: 600;
+  }
+
+  .answers {
+    display: grid;
+    gap: 12px;
+  }
+  .answer {
+    background: #fff;
+    border: 3px solid var(--game-muted);
+    border-radius: 16px;
+    padding: 16px 20px;
+    font-size: 1.1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    color: var(--game-text);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 60px;
+    position: relative;
+  }
+  .answer:hover:not(:disabled) {
+    border-color: var(--game-primary);
+    transform: translateX(4px);
+    background: #eaf4ff;
+  }
+  .answer:disabled { cursor: default; }
+  .answer .letter {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--game-primary);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  .answer.correct {
+    border-color: var(--game-success);
+    background: #e8f9ef;
+    animation: correctPop 0.5s;
+  }
+  .answer.correct .letter { background: var(--game-success); }
+  .answer.correct::after {
+    content: "✓";
+    position: absolute;
+    right: 18px;
+    font-size: 1.8rem;
+    color: var(--game-success);
+    font-weight: bold;
+  }
+  .answer.wrong {
+    border-color: var(--game-error);
+    background: #fdecea;
+    animation: shake 0.5s;
+  }
+  .answer.wrong .letter { background: var(--game-error); }
+  .answer.wrong::after {
+    content: "✗";
+    position: absolute;
+    right: 18px;
+    font-size: 1.8rem;
+    color: var(--game-error);
+    font-weight: bold;
+  }
+
+  @keyframes correctPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+    100% { transform: scale(1); }
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%,60% { transform: translateX(-8px); }
+    40%,80% { transform: translateX(8px); }
+  }
+
+  .feedback {
+    margin-top: 18px;
+    padding: 16px 18px;
+    border-radius: 14px;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    display: none;
+    animation: pop 0.4s;
+  }
+  .feedback.show { display: block; }
+  .feedback.good {
+    background: #e8f9ef;
+    border-left: 6px solid var(--game-success);
+    color: #1e6e3f;
+  }
+  .feedback.bad {
+    background: #fdecea;
+    border-left: 6px solid var(--game-error);
+    color: #8b2a1f;
+  }
+  .feedback .signal {
+    font-weight: bold;
+    font-size: 1.15rem;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .next-btn-wrap {
+    margin-top: 18px;
+    text-align: center;
+    display: none;
+  }
+  .next-btn-wrap.show { display: block; animation: pop 0.4s; }
+
+  /* === Финальный экран === */
+  .final-card {
+    background: var(--game-card);
+    border-radius: 28px;
+    padding: 36px 26px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4), inset 0 0 0 4px var(--game-accent);
+  }
+  .final-card h1 {
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    color: var(--game-primary);
+    margin-bottom: 12px;
+    text-shadow: 2px 2px 0 var(--game-sand);
+  }
+  .stars {
+    font-size: 3.5rem;
+    margin: 18px 0;
+    letter-spacing: 8px;
+  }
+  .stars .star {
+    display: inline-block;
+    color: #ddd;
+    transition: all 0.5s;
+  }
+  .stars .star.active {
+    color: var(--game-accent);
+    text-shadow: 0 0 20px var(--game-accent);
+    animation: starPop 0.6s ease;
+  }
+  @keyframes starPop {
+    0% { transform: scale(0) rotate(-180deg); }
+    70% { transform: scale(1.3) rotate(10deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+
+  .final-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+  }
+  .stat {
+    background: linear-gradient(135deg, #fff, var(--game-sand));
+    border-radius: 14px;
+    padding: 14px 8px;
+    border: 2px solid var(--game-primary);
+  }
+  .stat .num {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--game-primary);
+    display: block;
+  }
+  .stat .lbl {
+    font-size: 0.85rem;
+    color: var(--game-text);
+    opacity: 0.8;
+  }
+
+  .final-message {
+    font-size: 1.1rem;
+    color: var(--game-text);
+    margin: 16px 0 22px;
+    line-height: 1.5;
+  }
+
+  .final-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* === Ошибки === */
+  .mistakes-list {
+    text-align: left;
+    margin-top: 18px;
+    max-height: 50vh;
+    overflow-y: auto;
+    padding: 10px;
+    background: #fff;
+    border-radius: 14px;
+    border: 2px solid var(--game-primary);
+  }
+  .mistake-item {
+    padding: 12px;
+    border-bottom: 1px dashed var(--game-muted);
+    font-size: 0.95rem;
+  }
+  .mistake-item:last-child { border-bottom: none; }
+  .mistake-item .q { font-weight: bold; color: var(--game-primary); margin-bottom: 4px; }
+  .mistake-item .your { color: var(--game-error); }
+  .mistake-item .right { color: var(--game-success); font-weight: bold; }
+
+  /* === Конфетти === */
+  .confetti {
+    position: fixed;
+    width: 10px; height: 14px;
+    top: -20px;
+    z-index: 9999;
+    pointer-events: none;
+    animation: confettiFall 1s linear forwards;
+  }
+  @keyframes confettiFall {
+    to { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* Адаптация */
+  @media (max-width: 480px) {
+    .start-card, .final-card, .question-card { padding: 22px 16px; }
+    .top-bar { padding: 10px 12px; }
+    .score-box, .progress-box { font-size: 0.95rem; }
+    .btn { padding: 16px 24px; font-size: 1.05rem; }
+    .answer { padding: 14px 16px; font-size: 1rem; min-height: 54px; }
+    .answer .letter { width: 28px; height: 28px; font-size: 0.9rem; }
+    .final-stats { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .stat .num { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Фон -->
+<div class="sea-bg">
+  <div class="wave w1"></div>
+  <div class="wave w2"></div>
+  <div class="wave w3"></div>
+  <div class="decor d1"></div>
+  <div class="decor d2">⚓</div>
+  <div class="decor d3">⭐</div>
+  <div class="decor d4">🐙</div>
+  <div class="decor d5">🌊</div>
+  <!-- Гирлянда вечеринки -->
+  <svg class="garland" viewBox="0 0 800 60" preserveAspectRatio="none">
+    <path d="M0 10 Q 200 40 400 10 T 800 10" stroke="#f4b942" stroke-width="2" fill="none"/>
+    <g>
+      <polygon points="80,15 95,40 65,40" fill="#ff7f6a"/>
+      <polygon points="180,20 195,45 165,45" fill="#1e73b8"/>
+      <polygon points="280,15 295,40 265,40" fill="#2ecc71"/>
+      <polygon points="380,20 395,45 365,45" fill="#f4b942"/>
+      <polygon points="480,15 495,40 465,40" fill="#ff7f6a"/>
+      <polygon points="580,20 595,45 565,45" fill="#1e73b8"/>
+      <polygon points="680,15 695,40 665,40" fill="#2ecc71"/>
+    </g>
+  </svg>
+</div>
+
+<div class="app">
+
+  <!-- СТАРТ -->
+  <div class="screen active" id="startScreen">
+    <div class="start-card">
+      <span class="big-emoji">🏴☠️🌊</span>
+      <h1>Морская вечеринка!</h1>
+      <div class="subtitle"> Стикер дня ⚓</div>
+      <p>Добро пожаловать на борт, юный моряк! <br>
+      Тебя ждут <b>23 задания</b> по английскому — проверим слова из стикера дня. Собирай звёзды, избегай акул-ошибок и доплыви до сокровищ!</p>
+      <button class="btn btn-primary" onclick="startGame()"> В плавание!</button>
+    </div>
+  </div>
+
+  <!-- ИГРА -->
+  <div class="screen" id="gameScreen">
+    <div class="top-bar">
+      <div class="score-box">
+        <div class="coin" id="scoreCoin">0</div>
+        <span>очков</span>
+      </div>
+      <div class="progress-box">
+        Выполнено: <b id="doneCount">0</b> | Осталось: <b id="leftCount">23</b>
+      </div>
+    </div>
+    <div class="progress-line"><div class="progress-fill" id="progressFill"></div></div>
+
+    <div class="question-card">
+      <div class="question-num" id="questionNum">Вопрос 1 / 23</div>
+      <div id="mediaContainer"></div>
+      <div class="question-text" id="questionText"></div>
+      <div class="answers" id="answersBox"></div>
+      <div class="feedback" id="feedback"></div>
+      <div class="next-btn-wrap" id="nextWrap">
+        <button class="btn btn-primary" onclick="nextQuestion()">Дальше ➜</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ФИНАЛ -->
+  <div class="screen" id="finalScreen">
+    <div class="final-card">
+      <h1>🎉 Миссия выполнена! 🎉</h1>
+      <div class="stars" id="starsBox">
+        <span class="star">★</span><span class="star">★</span><span class="star">★</span>
+      </div>
+      <div class="final-stats">
+        <div class="stat"><span class="num" id="finalScore">0</span><span class="lbl">очков</span></div>
+        <div class="stat"><span class="num" id="finalCorrect">0</span><span class="lbl">верно</span></div>
+        <div class="stat"><span class="num" id="finalWrong">0</span><span class="lbl">ошибок</span></div>
+      </div>
+      <div class="final-message" id="finalMessage"></div>
+      <div class="final-buttons">
+        <button class="btn btn-primary" onclick="restartGame()">🔄 Играть снова</button>
+        <button class="btn btn-secondary" onclick="showMistakes()">🔍 Посмотреть ошибки</button>
+      </div>
+      <div id="mistakesContainer"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // === Вопросы ===
+  const questions = [
+    {
+      q: "Что на фото?",
+      media: { type: "image", src: "slippers.JPG" },
+      options: ["curtains", "slippers", "ceiling"],
+      correct: 1,
+      explain: { good: "", bad: "Почти! На фото slippers — это тапочки." }
+    },
+    {
+      q: "Socket – это?",
+      options: ["сок", "носок", "розетка", "мыло", "душ"],
+      correct: 2,
+      explain: { good: "", bad: "Почти! Socket — это розетка, а не сок и не носок." }
+    },
+    {
+      q: "Ноутбук на английском?",
+      options: ["laptop", "toplap", "loptap"],
+      correct: 0,
+      explain: { good: "", bad: "Почти! Правильно пишется laptop — буква 'a' в середине." }
+    },
+    {
+      q: "Мы варим суп в …?",
+      options: ["spoon", "pot", "soap"],
+      correct: 1,
+      explain: { good: "", bad: "Почти! Мы варим суп в pot (кастрюле), а не в ложке или мыле." }
+    },
+    {
+      q: "На фото chandelier!",
+      media: { type: "image", src: "lamp.JPG" },
+      options: ["True (правда)", "False (ложь)"],
+      correct: 0,
+      explain: { good: "", bad: "Почти! На фото chandelier — это правда (True)." }
+    },
+    {
+      q: "Что услышали?",
+      media: { type: "video", src: "fridge.MP4" },
+      options: ["fridge", "mirror", "оба варианта", "абракадабра"],
+      correct: 2,
+      explain: { good: "", bad: "Почти! В записи звучат оба варианта — fridge и mirror." }
+    },
+    {
+      q: "Ceiling – это?",
+      options: ["растение", "штора", "потолок", "картина", "душ"],
+      correct: 2,
+      explain: { good: "", bad: "Почти! Ceiling переводится как потолок." }
+    },
+    {
+      q: "Сахар пишется так – sugar.",
+      options: ["True (правда)", "False (ложь)"],
+      correct: 0,
+      explain: { good: "", bad: "Почти! Sugar — правильное написание, это правда (True)." }
+    },
+    {
+      q: "На фото:",
+      media: { type: "image", src: "spoon.JPG" },
+      options: ["plant", "napkin", "spoon"],
+      correct: 2,
+      explain: { good: "", bad: "Почти! На фото spoon — ложка." }
+    },
+    {
+      q: "Пульт на английском:",
+      options: ["remote control", "control remote"],
+      correct: 0,
+      explain: { good: "", bad: "Почти! Правильный порядок слов: remote control." }
+    },
+    {
+      q: "Есть в тексте слово bathtub?",
+      media: { type: "video", src: "bathtub.MP4" },
+      options: ["Yes", "No"],
+      correct: 0,
+      explain: { good: "", bad: "Почти! В записи есть слово bathtub — ответ Yes." }
+    },
+    {
+      q: "Shower – это?",
+      options: ["коврик", "розетка", "штора", "душ", "миска"],
+      correct: 3,
+      explain: { good: "", bad: "Почти! Shower переводится как душ." }
+    },
+    {
+      q: "Штора пишется так:",
+      options: ["curtain", "certain", "curtan"],
+      correct: 0,
+      explain: { good: "", bad: "Почти! Правильно curtain — с буквой 'u' после 'c'." }
+    },
+    {
+      q: "Что на фото?",
+      media: { type: "image", src: "soap.JPG" },
+      options: ["plant", "soap"],
+      correct: 1,
+      explain: { good: "", bad: "Почти! На фото soap — мыло." }
+    },
+    {
+      q: "Мы кипятим воду в …?",
+      options: ["shower", "socket", "kettle"],
+      correct: 2,
+      explain: { good: "", bad: "Почти! Воду кипятят в kettle (чайнике)." }
+    },
+    {
+      q: "Бумага на английском?",
+      options: ["picture", "plant", "paper"],
+      correct: 2,
+      explain: { good: "", bad: "Почти! Бумага по-английски — paper." }
+    },
+    {
+      q: "Что такое mat?",
+      options: ["коврик", "шахматы", "мат"],
+      correct: 0,
+      explain: { good: "", bad: "Почти! Mat переводится как коврик." }
+    },
+    {
+      q: "Комнатное растение – это plant!",
+      options: ["True (правда)", "False (ложь)"],
+      correct: 0,
+      explain: { good: "", bad: "Почти! Plant — это растение, ответ True." }
+    },
+    {
+      q: "Что на фото?",
+      media: { type: "image", src: "brush.JPG" },
+      options: ["brush", "crush", "brash", "brosh"],
+      correct: 0,
+      explain: { good: "", bad: "Почти! Правильно пишется brush — через 'u'." }
+    },
+    {
+      q: "Что услышали?",
+      media: { type: "video", src: "picture.MP4" },
+      options: ["mat", "picture", "оба варианта", "абракадабра"],
+      correct: 1,
+      explain: { good: "", bad: "Почти! В записи звучит слово picture." }
+    },
+    {
+      q: "Что такое napkin?",
+      options: ["картина", "салфетка", "пикник", "миска", "люстра"],
+      correct: 1,
+      explain: { good: "", bad: "Почти! Napkin переводится как салфетка." }
+    },
+    {
+      q: "Выключатель на английском?",
+      options: ["switch", "swetch", "swecha"],
+      correct: 0,
+      explain: { good: "", bad: "Почти! Правильно пишется switch — через 'i'." }
+    },
+    {
+      q: "Миска на английском – это bowl!",
+      options: ["True (правда)", "False (ложь)"],
+      correct: 0,
+      explain: { good: "", bad: "Почти! Bowl — это миска, ответ True." }
+    }
+  ];
+
+  // === Состояние ===
+  let currentQ = 0;
+  let score = 0;
+  let correctCount = 0;
+  let mistakes = [];
+  let answered = false;
+
+  // === Пузыри ===
+  function spawnBubbles() {
+    const bg = document.querySelector('.sea-bg');
+    for (let i = 0; i < 10; i++) {
+      const b = document.createElement('div');
+      b.className = 'bubble';
+      const size = 10 + Math.random() * 30;
+      b.style.width = size + 'px';
+      b.style.height = size + 'px';
+      b.style.left = Math.random() * 100 + '%';
+      b.style.animationDuration = (8 + Math.random() * 10) + 's';
+      b.style.animationDelay = Math.random() * 8 + 's';
+      bg.appendChild(b);
+    }
+  }
+  spawnBubbles();
+
+  // === Навигация ===
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function startGame() {
+    currentQ = 0;
+    score = 0;
+    correctCount = 0;
+    mistakes = [];
+    showScreen('gameScreen');
+    renderQuestion();
+  }
+
+  function restartGame() {
+    document.getElementById('mistakesContainer').innerHTML = '';
+    startGame();
+  }
+
+  // === Рендер вопроса ===
+  function renderQuestion() {
+    answered = false;
+    const q = questions[currentQ];
+    document.getElementById('questionNum').textContent = `Вопрос ${currentQ + 1} / ${questions.length}`;
+    document.getElementById('questionText').textContent = q.q;
+    document.getElementById('scoreCoin').textContent = score;
+    document.getElementById('doneCount').textContent = currentQ;
+    document.getElementById('leftCount').textContent = questions.length - currentQ;
+    document.getElementById('progressFill').style.width = (currentQ / questions.length * 100) + '%';
+
+    // Медиа
+    const mc = document.getElementById('mediaContainer');
+    mc.innerHTML = '';
+    if (q.media) {
+      const box = document.createElement('div');
+      box.className = 'media-box';
+      
+      if (q.media.type === 'image') {
+        box.innerHTML = `<div class="media-label">📸 Фото</div><img src="${q.media.src}" alt="Question image" onerror="this.style.display='none'; this.parentElement.innerHTML+='<div style=\'color:var(--game-error);padding:20px\'>Изображение не загружено</div>';">`;
+      } else if (q.media.type === 'audio') {
+        box.innerHTML = `
+          <div class="media-label">🎧 Аудио</div>
+          <audio controls src="${q.media.src}">
+            Ваш браузер не поддерживает аудио элемент.
+          </audio>
+        `;
+      } else if (q.media.type === 'video') {
+        box.innerHTML = `
+          <div class="media-label">🎬 Видео</div>
+          <video controls src="${q.media.src}" style="max-height: 250px;">
+            Ваш браузер не поддерживает видео элемент.
+          </video>
+        `;
+      }
+      
+      mc.appendChild(box);
+    }
+
+    // Ответы
+    const ab = document.getElementById('answersBox');
+    ab.innerHTML = '';
+    const letters = ['А', 'Б', 'В', 'Г', 'Д'];
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'answer';
+      btn.innerHTML = `<span class="letter">${letters[i] || (i+1)}</span><span>${opt}</span>`;
+      btn.onclick = () => selectAnswer(i, btn);
+      ab.appendChild(btn);
+    });
+
+    // Скрыть пояснение и кнопку
+    document.getElementById('feedback').classList.remove('show');
+    document.getElementById('feedback').className = 'feedback';
+    document.getElementById('nextWrap').classList.remove('show');
+  }
+
+  // === Выбор ответа ===
+  function selectAnswer(idx, btn) {
+    if (answered) return;
+    answered = true;
+
+    const q = questions[currentQ];
+    const allBtns = document.querySelectorAll('.answer');
+    allBtns.forEach(b => b.disabled = true);
+
+    const feedback = document.getElementById('feedback');
+
+    if (idx === q.correct) {
+      btn.classList.add('correct');
+      score++;
+      correctCount++;
+      feedback.className = 'feedback good show';
+      feedback.innerHTML = `<span class="signal">✨ Отлично! ✨</span>${q.explain.good}`;
+      launchConfetti();
+    } else {
+      btn.classList.add('wrong');
+      allBtns[q.correct].classList.add('correct');
+      mistakes.push({
+        q: q.q,
+        your: q.options[idx],
+        right: q.options[q.correct]
+      });
+      feedback.className = 'feedback bad show';
+      feedback.innerHTML = `<span class="signal">🌊 Почти! Попробуй ещё раз в следующий раз.</span>${q.explain.bad}<br><b>Правильный ответ:</b> ${q.options[q.correct]}`;
+    }
+
+    document.getElementById('scoreCoin').textContent = score;
+    document.getElementById('nextWrap').classList.add('show');
+  }
+
+  // === Следующий вопрос ===
+  function nextQuestion() {
+    currentQ++;
+    if (currentQ >= questions.length) {
+      showFinal();
+    } else {
+      renderQuestion();
+    }
+  }
+
+  // === Конфетти ===
+  function launchConfetti() {
+    const colors = ['#f4b942', '#ff7f6a', '#2ecc71', '#1e73b8', '#fff'];
+    for (let i = 0; i < 40; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDuration = (0.8 + Math.random() * 0.6) + 's';
+      c.style.animationDelay = Math.random() * 0.2 + 's';
+      c.style.transform = `rotate(${Math.random() * 360}deg)`;
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 1500);
+    }
+  }
+
+  // === Финал ===
+  function showFinal() {
+    showScreen('finalScreen');
+    const total = questions.length;
+    const wrong = total - correctCount;
+    const percent = correctCount / total * 100;
+
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('finalCorrect').textContent = correctCount;
+    document.getElementById('finalWrong').textContent = wrong;
+
+    // Звёзды
+    let stars = 0;
+    if (percent >= 100) stars = 3;
+    else if (percent >= 75) stars = 2;
+    else if (percent >= 50) stars = 1;
+
+    const starEls = document.querySelectorAll('#starsBox .star');
+    starEls.forEach((s, i) => {
+      setTimeout(() => {
+        if (i < stars) s.classList.add('active');
+        else s.classList.remove('active');
+      }, i * 300);
+    });
+
+    // Сообщение
+    let msg = '';
+    if (stars === 3) {
+      msg = `🏆 Невероятно! Ты настоящий морской волк! Все ${total} слов покорились тебе!`;
+    } else if (stars === 2) {
+      const need = total - correctCount;
+      msg = ` Отличный результат! Ещё ${need} слов${need === 1 ? 'о' : ''} — и будет 3 звезды!`;
+    } else if (stars === 1) {
+      const need = Math.ceil(total * 0.75) - correctCount;
+      msg = ` Хорошее плавание! Потренируйся ещё — и доплывёшь до 2 звёзд (нужно ещё ${need}).`;
+    } else {
+      msg = `🐚 Не сдавайся, моряк! Повтори слова из стикера дня и попробуй снова — у тебя обязательно получится!`;
+    }
+    document.getElementById('finalMessage').textContent = msg;
+
+    if (stars === 3) launchConfetti();
+  }
+
+  // === Ошибки ===
+  function showMistakes() {
+    const box = document.getElementById('mistakesContainer');
+    if (mistakes.length === 0) {
+      box.innerHTML = `<div class="mistakes-list" style="text-align:center;padding:20px"><b>🏆 Ошибок нет! Ты молодец!</b></div>`;
+      return;
+    }
+    let html = `<div class="mistakes-list"><b style="color:var(--game-primary);display:block;margin-bottom:10px;text-align:center">📝 Работа над ошибками</b>`;
+    mistakes.forEach((m, i) => {
+      html += `<div class="mistake-item">
+        <div class="q">${i + 1}. ${m.q}</div>
+        <div class="your">Твой ответ: ${m.your}</div>
+        <div class="right">Правильно: ${m.right}</div>
+      </div>`;
+    });
+    html += `</div>`;
+    box.innerHTML = html;
+  }
+</script>
+
+</body>
+</html>
